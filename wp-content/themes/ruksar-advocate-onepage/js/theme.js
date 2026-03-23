@@ -1,5 +1,5 @@
 /* ============================================================
-   Ruksar Advocate OnePage — Theme JavaScript
+   Rukhsar Advocate OnePage — Theme JavaScript
    ============================================================ */
 document.addEventListener('DOMContentLoaded', function () {
   'use strict';
