@@ -149,6 +149,226 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  /* ==========================================================
+     Premium Animation Enhancements
+     ========================================================== */
+
+  /* ---------- Scroll Progress Bar ---------- */
+  var progressBar = document.createElement('div');
+  progressBar.className = 'ra-scroll-progress';
+  document.body.appendChild(progressBar);
+
+  function updateScrollProgress() {
+    var scrollTop = window.scrollY;
+    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    if (docHeight > 0) {
+      progressBar.style.transform = 'scaleX(' + (scrollTop / docHeight) + ')';
+    }
+  }
+
+  /* ---------- Cursor Glow Follower ---------- */
+  if (!prefersReducedMotion && window.innerWidth > 768) {
+    var glowCursor = document.createElement('div');
+    glowCursor.className = 'ra-glow-cursor';
+    document.body.appendChild(glowCursor);
+
+    var mouseX = 0, mouseY = 0;
+    var glowX = 0, glowY = 0;
+
+    document.addEventListener('mousemove', function (e) {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    function animateGlow() {
+      // Smooth lerp follow
+      glowX += (mouseX - glowX) * 0.08;
+      glowY += (mouseY - glowY) * 0.08;
+      glowCursor.style.left = glowX + 'px';
+      glowCursor.style.top = glowY + 'px';
+      requestAnimationFrame(animateGlow);
+    }
+    requestAnimationFrame(animateGlow);
+  }
+
+  /* ---------- Parallax on hero elements ---------- */
+  if (!prefersReducedMotion) {
+    var heroSection = document.getElementById('home');
+    var heroImage = heroSection ? heroSection.querySelector('.elementor-image, .hero-image') : null;
+
+    var parallaxTicking = false;
+    window.addEventListener('scroll', function () {
+      if (!parallaxTicking) {
+        requestAnimationFrame(function () {
+          var scrollY = window.scrollY;
+          // Parallax hero image
+          if (heroImage && scrollY < window.innerHeight) {
+            heroImage.style.transform = 'translateY(' + (scrollY * 0.08) + 'px)';
+          }
+          parallaxTicking = false;
+        });
+        parallaxTicking = true;
+      }
+    }, { passive: true });
+  }
+
+  /* ---------- Magnetic buttons ---------- */
+  if (!prefersReducedMotion && window.innerWidth > 768) {
+    var magneticBtns = document.querySelectorAll('.btn-gold, .btn-outline, .elementor-button');
+    magneticBtns.forEach(function (btn) {
+      btn.addEventListener('mousemove', function (e) {
+        var rect = btn.getBoundingClientRect();
+        var x = e.clientX - rect.left - rect.width / 2;
+        var y = e.clientY - rect.top - rect.height / 2;
+        btn.style.transform = 'translate(' + (x * 0.15) + 'px, ' + (y * 0.15) + 'px)';
+      });
+      btn.addEventListener('mouseleave', function () {
+        btn.style.transform = '';
+      });
+    });
+  }
+
+  /* ---------- Multi-direction reveals ---------- */
+  if (!prefersReducedMotion) {
+    // About section: slide from left
+    var aboutSection = document.querySelector('[id="about"]');
+    if (aboutSection) {
+      var aboutChildren = aboutSection.querySelectorAll(':scope > .e-con > .e-con');
+      aboutChildren.forEach(function (child, i) {
+        if (!child.classList.contains('ra-reveal')) {
+          child.classList.add('ra-reveal', i % 2 === 0 ? 'ra-from-left' : 'ra-from-right');
+          child.classList.add('ra-stagger-' + Math.min(i + 1, 6));
+        }
+      });
+    }
+
+    // Practice area cards: scale in
+    var practiceCards = document.querySelectorAll('.practice-card');
+    practiceCards.forEach(function (card, i) {
+      if (!card.classList.contains('ra-reveal')) {
+        card.classList.add('ra-reveal', 'ra-scale-in', 'ra-stagger-' + Math.min(i + 1, 6));
+      }
+    });
+
+    // Credentials items
+    var credItems = document.querySelectorAll('.cred-item');
+    credItems.forEach(function (item, i) {
+      if (!item.classList.contains('ra-reveal')) {
+        item.classList.add('ra-reveal', 'ra-stagger-' + Math.min(i + 1, 6));
+      }
+    });
+
+    // Testimonial cards
+    var testimonialCards = document.querySelectorAll('.testimonial-card');
+    testimonialCards.forEach(function (card, i) {
+      if (!card.classList.contains('ra-reveal')) {
+        card.classList.add('ra-reveal', 'ra-stagger-' + Math.min(i + 1, 6));
+      }
+    });
+
+    // Re-observe newly added reveal elements
+    var newRevealElements = document.querySelectorAll('.ra-reveal:not(.ra-visible)');
+    if ('IntersectionObserver' in window && newRevealElements.length) {
+      var enhancedObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('ra-visible');
+            enhancedObserver.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.12,
+        rootMargin: '0px 0px -40px 0px'
+      });
+      newRevealElements.forEach(function (el) { enhancedObserver.observe(el); });
+    }
+  }
+
+  /* ---------- Text split reveal for hero heading ---------- */
+  if (!prefersReducedMotion) {
+    var heroHeading = document.querySelector('#home h1, #home .elementor-heading-title');
+    if (heroHeading && !heroHeading.dataset.raSplit) {
+      heroHeading.dataset.raSplit = 'true';
+      var text = heroHeading.textContent;
+      var words = text.split(' ');
+      heroHeading.innerHTML = '';
+      words.forEach(function (word, i) {
+        var span = document.createElement('span');
+        span.textContent = word + ' ';
+        span.style.display = 'inline-block';
+        span.style.opacity = '0';
+        span.style.transform = 'translateY(20px)';
+        span.style.transition = 'opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1) ' + (i * 0.1) + 's, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) ' + (i * 0.1) + 's';
+        heroHeading.appendChild(span);
+      });
+      // Trigger after a short delay
+      setTimeout(function () {
+        heroHeading.querySelectorAll('span').forEach(function (span) {
+          span.style.opacity = '1';
+          span.style.transform = 'none';
+        });
+      }, 300);
+    }
+  }
+
+  /* ---------- Enhanced scroll handler ---------- */
+  var scrollTicking = false;
+  window.addEventListener('scroll', function () {
+    if (!scrollTicking) {
+      requestAnimationFrame(function () {
+        updateScrollProgress();
+        scrollTicking = false;
+      });
+      scrollTicking = true;
+    }
+  }, { passive: true });
+  updateScrollProgress();
+
+  /* ---------- Tilt effect on practice cards ---------- */
+  if (!prefersReducedMotion && window.innerWidth > 768) {
+    var tiltCards = document.querySelectorAll('.practice-card, .stat-card');
+    tiltCards.forEach(function (card) {
+      card.addEventListener('mousemove', function (e) {
+        var rect = card.getBoundingClientRect();
+        var x = (e.clientX - rect.left) / rect.width - 0.5;
+        var y = (e.clientY - rect.top) / rect.height - 0.5;
+        card.style.transform = 'perspective(600px) rotateY(' + (x * 6) + 'deg) rotateX(' + (-y * 6) + 'deg) translateY(-4px)';
+      });
+      card.addEventListener('mouseleave', function () {
+        card.style.transform = '';
+        card.style.transition = 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)';
+        setTimeout(function () { card.style.transition = ''; }, 500);
+      });
+    });
+  }
+
+  /* ---------- Smooth section reveal with active nav ---------- */
+  if (!prefersReducedMotion) {
+    var navLinks = document.querySelectorAll('.nav-desktop a[href*="#"]');
+    if (navLinks.length) {
+      var sectionObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            var id = entry.target.id || entry.target.getAttribute('id');
+            if (id) {
+              navLinks.forEach(function (link) {
+                link.style.color = '';
+                if (link.getAttribute('href').includes('#' + id)) {
+                  link.style.color = 'var(--gold)';
+                }
+              });
+            }
+          }
+        });
+      }, { threshold: 0.3, rootMargin: '-20% 0px -50% 0px' });
+
+      ['home', 'about', 'practice-areas', 'credentials', 'testimonials', 'faq', 'contact'].forEach(function (id) {
+        var section = document.getElementById(id);
+        if (section) sectionObserver.observe(section);
+      });
+    }
+  }
+
   /* ---------- Navbar scroll state + sticky offset ---------- */
   var header = document.querySelector('.site-header')
     || document.querySelector('[data-id="2de1395"]')
