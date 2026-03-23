@@ -202,7 +202,34 @@ img:is([sizes=auto i],[sizes^="auto," i]){contain-intrinsic-size:3000px 1500px}
 		<style type="text/css" id="wp-custom-css">
 			html { scroll-behavior: smooth; }
 
-/* Fix: sticky header hides the section heading */
+/* Sticky header */
+.elementor-element-2de1395 {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 100;
+  transition: background 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease;
+}
+.elementor-element-2de1395.ra-scrolled {
+  background: rgba(10, 10, 10, 0.97) !important;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(12px);
+}
+
+/* Mobile nav below fixed header */
+.nav-mobile {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 99;
+  background: #0a0a0a;
+  border-bottom: 1px solid hsl(43, 20%, 20%);
+}
+
+/* Offset content so it isn't hidden behind the fixed header */
 :root { scroll-padding-top: 90px; }		</style>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"></head>
 <body class="home wp-singular page-template page-template-elementor_canvas page page-id-41 wp-theme-ruksar-advocate-onepage elementor-default elementor-template-canvas elementor-kit-8 elementor-page elementor-page-41">

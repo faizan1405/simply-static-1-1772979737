@@ -75,6 +75,10 @@ ul { list-style: none; }
   display: none; flex-direction: column; gap: 1rem;
   background: var(--bg); border-bottom: 1px solid var(--border);
   padding: 1rem 1.5rem 1.5rem;
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 99;
 }
 .nav-mobile.open { display: flex; }
 .nav-mobile a { color: var(--text-muted); font-size: 1rem; padding: 0.5rem 0; transition: color 0.3s; }
@@ -289,15 +293,24 @@ ul { list-style: none; }
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
-/* ---------- Navbar scroll state ---------- */
-.site-header,
+/* ---------- Sticky Navbar ---------- */
 .elementor-element-2de1395 {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 100;
+  transition: background 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease;
+}
+.site-header {
   transition: background 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
 }
 .site-header.ra-scrolled,
 .elementor-element-2de1395.ra-scrolled {
   background: rgba(10, 10, 10, 0.97) !important;
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(12px);
 }
 
 /* ---------- Gold separator animation ---------- */

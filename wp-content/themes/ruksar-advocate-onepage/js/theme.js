@@ -149,11 +149,26 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  /* ---------- Navbar scroll state ---------- */
+  /* ---------- Navbar scroll state + sticky offset ---------- */
   var header = document.querySelector('.site-header')
     || document.querySelector('[data-id="2de1395"]')
     || document.querySelector('.elementor-element-2de1395');
   if (header) {
+    // Add spacer so content is not hidden behind the fixed header
+    var spacer = document.createElement('div');
+    spacer.className = 'ra-header-spacer';
+    spacer.style.height = header.offsetHeight + 'px';
+    header.parentNode.insertBefore(spacer, header.nextSibling);
+
+    // Update spacer + scroll-padding on resize
+    function updateSpacer() {
+      var h = header.offsetHeight;
+      spacer.style.height = h + 'px';
+      document.documentElement.style.scrollPaddingTop = h + 'px';
+    }
+    window.addEventListener('resize', updateSpacer);
+    updateSpacer();
+
     var ticking = false;
     function updateHeader() {
       if (window.scrollY > 60) {
@@ -176,7 +191,15 @@ document.addEventListener('DOMContentLoaded', function () {
   var toggle = document.querySelector('.mobile-toggle');
   var mobileNav = document.querySelector('.nav-mobile');
   if (toggle && mobileNav) {
+    // Position mobile nav below the fixed header
+    function positionMobileNav() {
+      if (header) {
+        mobileNav.style.top = header.offsetHeight + 'px';
+      }
+    }
+
     toggle.addEventListener('click', function () {
+      positionMobileNav();
       mobileNav.classList.toggle('open');
       var expanded = toggle.getAttribute('aria-expanded') === 'true';
       toggle.setAttribute('aria-expanded', String(!expanded));
