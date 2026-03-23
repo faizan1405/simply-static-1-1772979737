@@ -4,6 +4,174 @@
 document.addEventListener('DOMContentLoaded', function () {
   'use strict';
 
+  /* ==========================================================
+     Premium Scroll-Reveal Animations
+     ========================================================== */
+  var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!prefersReducedMotion) {
+    /* ---------- Mark elements for reveal ---------- */
+    // Hero section children: heading, tagline, CTA, stats
+    var homeSection = document.getElementById('home');
+    if (homeSection) {
+      var heroWidgets = homeSection.querySelectorAll(':scope > .e-con > .e-con > .elementor-widget, :scope > .e-con > .elementor-widget');
+      // Fallback: get all direct child widgets/containers of the hero
+      if (!heroWidgets.length) {
+        heroWidgets = homeSection.querySelectorAll('.elementor-widget');
+      }
+      var heroChildren = homeSection.querySelectorAll(':scope > .e-con');
+      var stIdx = 1;
+      heroChildren.forEach(function (child) {
+        child.classList.add('ra-reveal', 'ra-stagger-' + Math.min(stIdx, 6));
+        stIdx++;
+      });
+      // Hero image
+      var heroImg = homeSection.querySelector('.elementor-image');
+      if (heroImg) {
+        heroImg.classList.add('ra-img-reveal');
+      }
+    }
+
+    // Section-level reveals for each major section (first element with each ID only)
+    var sectionIds = ['about', 'credentials', 'testimonials', 'faq', 'contact'];
+    sectionIds.forEach(function (id) {
+      var section = document.querySelector('[id="' + id + '"]');
+      if (section && (section.classList.contains('e-con') || section.classList.contains('elementor-widget'))) {
+        section.classList.add('ra-reveal');
+      }
+    });
+
+    // Softlite card boxes: stagger within their direct parent container
+    var cardGroups = document.querySelectorAll('.e-con');
+    cardGroups.forEach(function (group) {
+      var cards = group.querySelectorAll(':scope > .elementor-widget-softlite_dynamic_card_box');
+      if (cards.length > 1) {
+        cards.forEach(function (card, i) {
+          // Only add ra-reveal if no ancestor already has it (avoid nested opacity)
+          var ancestor = card.closest('.ra-reveal');
+          if (!ancestor) {
+            card.classList.add('ra-reveal', 'ra-stagger-' + Math.min(i + 1, 6));
+          }
+        });
+      }
+    });
+
+    // FAQ items stagger (only if not inside an already-reveal parent)
+    var faqItems = document.querySelectorAll('.faq-item');
+    faqItems.forEach(function (item, i) {
+      if (!item.closest('.ra-reveal')) {
+        item.classList.add('ra-reveal', 'ra-stagger-' + Math.min(i + 1, 6));
+      }
+    });
+
+    // Contact form
+    var contactForm = document.querySelector('#contact .elementor-widget-html');
+    if (contactForm) {
+      contactForm.classList.add('ra-reveal');
+    }
+
+    // Practice areas / list widgets
+    var listWidgets = document.querySelectorAll('.elementor-widget-softlite_dynamic_list');
+    listWidgets.forEach(function (w) {
+      w.classList.add('ra-reveal');
+    });
+
+    // Gold separators
+    document.querySelectorAll('.gold-separator').forEach(function (sep) {
+      sep.classList.add('ra-separator');
+    });
+
+    /* ---------- IntersectionObserver ---------- */
+    var revealElements = document.querySelectorAll('.ra-reveal, .ra-img-reveal, .ra-separator');
+    if ('IntersectionObserver' in window && revealElements.length) {
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('ra-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.12,
+        rootMargin: '0px 0px -40px 0px'
+      });
+      revealElements.forEach(function (el) { observer.observe(el); });
+    } else {
+      // Fallback: show everything
+      revealElements.forEach(function (el) { el.classList.add('ra-visible'); });
+    }
+
+    /* ---------- Stat counter animation ---------- */
+    var statTexts = [];
+    var statsContainer = document.querySelector('[data-id="2dad63b"]');
+    if (statsContainer) {
+      statTexts = statsContainer.querySelectorAll('.softlite-dynamic-card-box-text-1');
+    }
+    if (!statTexts.length) {
+      // Fallback: find stat cards near hero (first 3 card-box-text-1 elements)
+      var allStatTexts = document.querySelectorAll('#home .softlite-dynamic-card-box-text-1');
+      if (allStatTexts.length) statTexts = allStatTexts;
+    }
+
+    if (statTexts.length) {
+      var counterObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            animateCounter(entry.target);
+            counterObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.5 });
+
+      statTexts.forEach(function (el) { counterObserver.observe(el); });
+    }
+
+    function animateCounter(el) {
+      var text = el.textContent.trim();
+      var match = text.match(/^([\d,]+)([\+%]?)$/);
+      if (!match) return;
+
+      var target = parseInt(match[1].replace(/,/g, ''), 10);
+      var suffix = match[2] || '';
+      var duration = 1200;
+      var start = performance.now();
+
+      function update(now) {
+        var elapsed = now - start;
+        var progress = Math.min(elapsed / duration, 1);
+        // Ease-out cubic
+        var eased = 1 - Math.pow(1 - progress, 3);
+        var current = Math.round(target * eased);
+        el.textContent = current.toLocaleString() + suffix;
+        if (progress < 1) requestAnimationFrame(update);
+      }
+      requestAnimationFrame(update);
+    }
+  }
+
+  /* ---------- Navbar scroll state ---------- */
+  var header = document.querySelector('.site-header')
+    || document.querySelector('[data-id="2de1395"]')
+    || document.querySelector('.elementor-element-2de1395');
+  if (header) {
+    var ticking = false;
+    function updateHeader() {
+      if (window.scrollY > 60) {
+        header.classList.add('ra-scrolled');
+      } else {
+        header.classList.remove('ra-scrolled');
+      }
+      ticking = false;
+    }
+    window.addEventListener('scroll', function () {
+      if (!ticking) {
+        requestAnimationFrame(updateHeader);
+        ticking = true;
+      }
+    }, { passive: true });
+    updateHeader();
+  }
+
   /* ---------- Mobile Nav Toggle ---------- */
   var toggle = document.querySelector('.mobile-toggle');
   var mobileNav = document.querySelector('.nav-mobile');
